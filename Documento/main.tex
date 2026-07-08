@@ -1,0 +1,324 @@
+\documentclass[11pt,a4paper]{report}
+
+% ===================== PAQUETES =====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{caption}
+
+% Nombres en español (sin paquete babel, por disponibilidad del entorno de compilación)
+\renewcommand{\contentsname}{Índice general}
+\renewcommand{\listtablename}{Índice de tablas}
+\renewcommand{\listfigurename}{Índice de figuras}
+\renewcommand{\chaptername}{Capítulo}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\appendixname}{Anexo}
+\renewcommand{\abstractname}{Resumen}
+\renewcommand{\bibname}{Referencias}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{pdflscape}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=green!50!black,
+  urlcolor=blue!70!black
+}
+
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{PE3 -- Modelado UML y ERS/SRS del SIMPA}
+\lhead{Ingeniería de Requisitos -- UTEQ}
+\rfoot{\thepage}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% ===================== DATOS DEL DOCUMENTO =====================
+
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+
+    \textbf{\large UNIVERSIDAD TÉCNICA ESTATAL DE QUEVEDO}\\[0.5cm]
+
+    \includegraphics[width=4cm]{logo.png}\\[0.5cm]
+
+    \textbf{INGENIERÍA DE REQUERIMIENTOS}\\[0.5cm]
+
+\textbf{Link del Github}\\[0.5cm]
+
+
+
+    \textbf{TEMA:}\\[0.3cm]
+
+   PRÁCTICA EXPERIMENTAL UNIDAD III.\\[1cm]
+
+    \textbf{INTEGRANTES:}\\[0.5cm]
+   ESCUDERO PLAZA MARIA DEL ROSARIO\\[0.3cm]
+    HUILCAPI LEON DENISSES FABIOLA\\[0.3cm]
+    QUINTERO GENDE ERICK JAHIR\\[0.3cm]
+
+
+    \textbf{ASIGNATURA:}\\[0.3cm]
+
+    INGENIERÍA DE REQUERIMIENTOS\\[0.3cm]
+
+    \textbf{CURSO:}\\[0.3cm]
+
+    4TO “A” SOFTWARE\\[0.3cm]
+
+    \textbf{FECHA:}\\[0.3cm]
+
+    08/06/2026\\[0.5cm]
+
+    \textbf{DOCENTE:}\\[0.3cm]
+
+    ING. GUERRERO ULLOA GLEISTON CICERON
+
+    \vfill
+
+\end{titlepage}
+
+
+
+
+\tableofcontents
+\listoftables
+\listoffigures
+\clearpage
+
+\chapter{Introducción y marco normativo}
+
+\section{Propósito y alcance de la práctica}
+
+La presente práctica experimental (PE3) tiene por objetivo construir los modelos UML de
+especificación de requisitos del Sistema Inteligente de Mantenimiento de Palma Africana (SIMPA)
+--datos, funcionales y de comportamiento-- e integrarlos en un documento ERS/SRS estructurado
+según IEEE/ISO/IEC 29148:2018~\cite{ieee29148}, tomando como base de trabajo la lista de requisitos
+depurada de la práctica anterior y el SRS parcial de la Entrega 1B del Proyecto de Fin de Curso (PFC)
+correspondiente al SIMPA. El SIMPA es un sistema orientado a apoyar a administradores, técnicos y
+trabajadores agrícolas en la gestión y monitoreo de cultivos de palma africana, incorporando análisis
+de imágenes mediante inteligencia artificial para la detección temprana de plagas, enfermedades y
+deficiencias nutricionales, así como el registro georreferenciado de labores de polinización.
+
+\section{Marco normativo aplicado}
+
+La especificación de requisitos de software se rige por la estructura y los contenidos definidos en
+la norma IEEE/ISO/IEC 29148:2018~\cite{ieee29148}, sección 9 (SRS), que sustituye al estándar
+IEEE 830:1998 y define cuatro tipos de documentos: StRS (especificación de requisitos de
+stakeholders), SyRS (especificación de requisitos del sistema), SRS (especificación de requisitos de
+software) y OpsCon (concepto de operaciones). La calidad del SRS se evalúa mediante los criterios de
+completitud, consistencia, verificabilidad y trazabilidad definidos en ISO/IEC 25010:2023~\cite{iso25010},
+mientras que el SWEBOK v4.0~\cite{swebok2024}, en su capítulo 1 (secciones 1.5 a 1.7), orienta la
+documentación y el modelado de requisitos. Pohl~\cite{pohl2025}, en su parte dedicada a los artefactos
+de requisitos, distingue explícitamente las perspectivas de datos, función y comportamiento como ejes
+complementarios de todo modelo de requisitos, mientras que IEEE/ISO/IEC 15288:2023~\cite{ieee15288}
+establece la trazabilidad exigible desde los requisitos del sistema hasta los del software, y
+IEEE/ISO/IEC 12207:2017~\cite{ieee12207} enmarca estos procesos dentro del ciclo de vida completo del
+software. El PMBoK 7.\textsuperscript{a} edición~\cite{pmbok7} aporta el enfoque de gestión de valor y
+de stakeholders que sustenta la priorización MoSCoW ya aplicada en la Entrega 1B, y el syllabus
+CPRE Foundation Level v3.1 del IREB~\cite{ireb2023} define el vocabulario y las técnicas de elicitación,
+documentación y validación de requisitos utilizadas a lo largo de todo el proyecto.
+
+\subsection{Documentación de requisitos}
+
+La documentación de requisitos consiste en registrar, de forma estructurada y verificable, el
+conocimiento obtenido durante la elicitación, de manera que pueda ser validado por los stakeholders y
+utilizado por el equipo de desarrollo sin ambigüedad~\cite{ieee29148,swebok2024}. En el caso del SIMPA,
+esta documentación combina información textual (requisitos funcionales y no funcionales con
+plantilla de ocho atributos), tabular (atributos, priorización, trazabilidad) y gráfica (modelos UML),
+lo que exige mantener consistencia terminológica entre todos los artefactos, tal como recomienda
+Pohl~\cite{pohl2025} al describir el ciclo de documentación--validación--gestión de requisitos.
+
+\subsection{Documento ERS/SRS según IEEE/ISO/IEC 29148:2018}
+
+El documento ERS/SRS estructurado según IEEE/ISO/IEC 29148:2018~\cite{ieee29148} debe incluir, entre
+otros elementos, la introducción y el alcance del producto, la descripción general del sistema y sus
+usuarios, los requisitos específicos (funcionales, no funcionales y restricciones), y los anexos de
+verificación. La norma exige que cada requisito individual sea necesario, no ambiguo, completo,
+singular, factible, verificable, correcto y conforme (características de calidad de requisito), y que
+el conjunto del documento sea completo, consistente y modificable (características de calidad del
+documento)~\cite{ieee29148,iso25010}. El presente informe adopta esta estructura para organizar la
+revisión del SRS parcial de la Entrega 1B y los nuevos modelos de datos, funcionales y de
+comportamiento desarrollados en esta práctica.
+
+\subsection{Modelos de datos (perspectiva de datos)}
+
+La perspectiva de datos describe la estructura estática de la información que el sistema debe
+almacenar, gestionar y relacionar, independientemente de los procesos que la manipulan. Se instrumenta
+mediante el modelo entidad-relación (ER) y su transformación en un diagrama de clases UML, siguiendo
+la notación y el proceso de derivación propuestos por Maciaszek~\cite{maciaszek2007}: identificación de
+entidades a partir de los sustantivos clave de los requisitos funcionales, definición de atributos y
+claves primarias, e identificación de relaciones con su cardinalidad y participación. Para el SIMPA,
+esta perspectiva captura entidades como \textit{Lote}, \textit{Palma}, \textit{Diagnóstico} o
+\textit{RegistroPolinización}, cuya consistencia con el modelo conceptual de la Entrega 1B se preserva
+en la \Cref{sec:modelo-datos}.
+
+\subsection{Modelos funcionales (perspectiva funcional)}
+
+La perspectiva funcional describe las transformaciones que el sistema realiza sobre los datos: qué
+entra, qué sale y qué procesos intermedios existen. Se representa mediante diagramas de flujo de datos
+(DFD) en sus niveles de contexto (Nivel 0), descomposición (Nivel 1) y esencial, así como mediante el
+diagrama de actividades UML, que añade a la vista de procesos el control de flujo (decisiones,
+bifurcaciones concurrentes) y los responsables (swimlanes)~\cite{maciaszek2007,swebok2024}. Para el
+SIMPA, el proceso central es el análisis de imagen para la detección de plagas, enfermedades y
+deficiencias nutricionales, apoyado por procesos secundarios de registro de labores, polinización y
+generación de reportes.
+
+\subsection{Modelos de comportamiento (perspectiva de comportamiento)}
+
+La perspectiva de comportamiento describe cómo cambian de estado las entidades del dominio a lo largo
+del tiempo en respuesta a eventos, y cómo interactúan los objetos entre sí para cumplir un escenario
+concreto. Se instrumenta mediante el diagrama de máquina de estados UML, cuya base formal son los
+statecharts de Harel~\cite{harel1987}, y el diagrama de secuencia UML, que documenta el orden temporal
+de los mensajes intercambiados entre los actores y el sistema. En el SIMPA, la entidad con mayor
+riqueza de estados es el \textit{Lote}, cuyo ciclo de vida atraviesa etapas de siembra, crecimiento,
+polinización, fructificación y cosecha.
+
+\subsection{Interrelaciones entre las tres perspectivas}
+
+Las tres perspectivas --datos, función y comportamiento-- no son independientes: cada requisito
+funcional del SIMPA debe poder proyectarse simultáneamente sobre el modelo de clases (qué datos
+manipula), sobre el modelo de procesos (qué transformación ejecuta) y, cuando corresponda, sobre el
+modelo de estados o de secuencia (cómo cambia el estado del dominio o cómo se ordenan los mensajes)
+~\cite{pohl2025,maciaszek2007}. Esta triple proyección es la que permite construir la matriz de
+trazabilidad de la \Cref{sec:trazabilidad} y detectar de forma sistemática vacíos de cobertura
+(\textit{gaps}) o sobreespecificación (\textit{gold plating})~\cite{ieee29148}.
+\chapter{Revisión y refinamiento del SRS parcial}
+
+\section{Identificación de defectos}
+
+Se revisó cada requisito del SRS parcial de la Entrega 1B contra los criterios de calidad de
+IEEE/ISO/IEC 29148:2018~\cite{ieee29148} (no ambigüedad, verificabilidad, singularidad, completitud).
+Se identificaron y registraron seis defectos, documentados con su corrección propuesta en la
+\Cref{tab:defectos-resumen}; el registro completo, con la traza a la corrección aplicada mediante EARS,
+se presenta en el Anexo~B.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Resumen de defectos detectados en el SRS parcial (Entrega 1B)}
+\label{tab:defectos-resumen}
+\begin{tabularx}{\linewidth}{|c|Y|c|Y|}
+\hline
+\textbf{ID} & \textbf{Defecto} & \textbf{Tipo} & \textbf{Corrección propuesta} \\
+\hline
+D-01 & RF-04 mezcla dos capacidades distintas (registrar labor de riego/polinización y registrar labor
+de mantenimiento) en un único enunciado. & Ambigüedad / no singular & Mantener el RF-04 dividido
+conceptualmente por subtipo de labor en la tabla de atributos, conservando el mismo ID por
+compatibilidad con la Entrega 1B, pero explicitando en EARS los cuatro subtipos como condiciones. \\
+\hline
+D-02 & RF-06 (``debe registrar y dar seguimiento'') no especifica el evento disparador ni la condición
+de transición entre etapas del cultivo. & No verificable & Reescribir en EARS de tipo
+\textit{event-driven}, con el evento explícito de cambio de etapa. \\
+\hline
+D-03 & RF-09 depende de RF-07 pero no declara la precondición de forma explícita en el enunciado
+original (solo en la tabla de atributos). & Incompletitud & Reescribir en EARS de tipo
+\textit{state-driven}, condicionando la respuesta a la existencia de un diagnóstico de plaga vigente. \\
+\hline
+D-04 & NFR-02 (tiempo de respuesta de la IA) no indica el percentil de la medición, dejando ambigua la
+verificación (¿promedio o peor caso?). & No verificable & Especificar percentil 95 y condición de
+ancho de banda mínimo, alineado con ISO/IEC 25010~\cite{iso25010}. \\
+\hline
+D-05 & RF-14 usa lenguaje impreciso (``sin requerir ingreso manual planta por planta'') en lugar de una
+condición operacional formal. & Ambigüedad & Reescribir en EARS \textit{ubiquitous} con la condición
+técnica explícita (frecuencia de muestreo GPS y unidad de conteo). \\
+\hline
+D-06 & RD-05 (restricción de arquitectura) no está trazada a ningún requisito no funcional de
+disponibilidad, dejando un vacío entre restricción y NFR. & Inconsistencia / trazabilidad incompleta &
+Vincular RD-05 a NFR-03 (disponibilidad del backend) en la matriz de trazabilidad. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Corrección de defectos mediante sintaxis EARS}
+
+Las correcciones se expresan con la sintaxis EARS (\textit{Easy Approach to Requirements Syntax})
+propuesta por Mavin et al.~\cite{mavin2009}, que reduce la ambigüedad de los requisitos en lenguaje
+natural mediante cinco patrones estructurados. Para el SIMPA se emplean principalmente el patrón
+\textit{ubiquitous} (\texttt{The <system> shall <response>}) y el patrón \textit{state-driven}
+(\texttt{While <precondición>, the <system> shall <response>}), además del patrón
+\textit{event-driven} (\texttt{When <disparador>, the <system> shall <response>}) para los requisitos
+cuya activación depende de un evento discreto.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Requisitos corregidos con sintaxis EARS}
+\label{tab:ears}
+\begin{tabularx}{\linewidth}{|c|Y|}
+\hline
+\textbf{ID} & \textbf{Enunciado EARS} \\
+\hline
+RF-04 & \textit{While} the user is authenticated and the lot exists, the SIMPA \textit{shall} allow the
+registration of an agricultural labor of type irrigation, pollination, phytosanitary control, or
+maintenance, associated with the lot, the date, and the responsible worker. \\
+\hline
+RF-06 & \textit{When} the administrator registers a stage change for a lot, the SIMPA \textit{shall}
+update the lot's current stage and append the previous stage with its end date to the lot's stage
+timeline. \\
+\hline
+RF-09 & \textit{While} a pest diagnosis exists for a lot, the SIMPA \textit{shall} display the pest's
+species or family, its life cycle stage, and a recommended control action consistent with that stage. \\
+\hline
+NFR-02 & \textit{While} network bandwidth is at least 5 Mbps, the SIMPA \textit{shall} return an
+image-based diagnosis result within 10 seconds for at least the 95th percentile of requests. \\
+\hline
+RF-14 & \textit{While} GPS tracking is active with a sampling interval of at most 30 seconds, the
+SIMPA \textit{shall} automatically compute the daily count of pollinated flowers per worker from the
+georeferenced markers, without requiring manual per-plant input. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Tabla de atributos de requisitos funcionales y no funcionales}
+
+La tabla de atributos completa, con los ocho campos definidos por Hull, Jackson y Dick~\cite{hull2011}
+para los veinte requisitos funcionales y los nueve requisitos no funcionales del SIMPA, se presenta en
+el Anexo~A por motivos de extensión. La \Cref{tab:atributos-muestra} resume una muestra representativa.
+
+\begin{table}[H]
+\centering
+\caption{Muestra de la tabla de atributos (ver Anexo A para la tabla completa)}
+\label{tab:atributos-muestra}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|c|p{5cm}|c|c|c|c|c|c|}
+\hline
+\textbf{ID} & \textbf{Descripción} & \textbf{Tipo} & \textbf{MoSCoW} & \textbf{Fuente} &
+\textbf{Estabilidad} & \textbf{Estado} & \textbf{Verificable} \\
+\hline
+RF-01 & Autenticación y control de acceso por rol & RF & Must & EV-01, EV-04 & Estable & Aprobado & S \\
+RF-07 & Detección de plagas y enfermedades por imagen (IA) & RF & Must & EV-01, EV-02 & Volátil &
+Aprobado & S \\
+RF-14 & Conteo automático de flores polinizadas por GPS & RF & Must & EV-03 & Volátil & Aprobado & S \\
+NFR-04 & Operación offline con sincronización diferida & RNF & Must & EV-01 & Estable & Aprobado & S \\
+RD-05 & Backend en la nube con API REST & Restricción & Must & Arquitectura & Estable & Aprobado & S \\
+\hline
+\end{tabular}}
+\end{table}
+
+\clearpage
+\bibliographystyle{ieeetr}
+\bibliography{referencias}
+
+
+\end{document}
