@@ -36,7 +36,7 @@
 
 \hypersetup{
   colorlinks=true,
-  linkcolor=blue!50!black,
+  linkcolor=black,
   citecolor=green!50!black,
   urlcolor=blue!70!black
 }
@@ -63,9 +63,6 @@
     \includegraphics[width=4cm]{logo.png}\\[0.5cm]
 
     \textbf{INGENIERÍA DE REQUERIMIENTOS}\\[0.5cm]
-
-\textbf{Link del Github}\\[0.5cm]
-
 
 
     \textbf{TEMA:}\\[0.3cm]
@@ -97,7 +94,6 @@
     \vfill
 
 \end{titlepage}
-
 
 
 
@@ -403,6 +399,13 @@ registra\_en\_lote & Lote--RegistroPolinizacion & 1:N & Total en RegistroPoliniz
 
 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Entidad-Relacion.drawio.pdf}
+\caption{Diagrama entidad-relación del dominio SIMPA (notación Crow's Foot)}
+\label{fig:diagrama-er}
+\end{figure}
+
 \section{Verificación de la Tercera Forma Normal (3FN)}
 
 Se verificó que ninguna entidad presenta dependencias transitivas: todos los atributos no clave
@@ -437,8 +440,12 @@ Alerta & +generarAlerta(diagnostico: Diagnostico): void; +marcarAtendida(): void
 \end{tabularx}
 \end{table}
 
-\noindent
-\textbf{Aquí va la imagen del Diagrama de Clases UML.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Clases.drawio.pdf}
+\caption{Diagrama de clases UML del dominio SIMPA}
+\label{fig:diagrama-clases}
+\end{figure}
 \chapter{Modelo funcional: DFD y diagrama de actividades}
 
 \section{Diagrama de contexto (DFD Nivel 0)}
@@ -474,8 +481,12 @@ Base de conocimiento de plagas & Consulta especie/tratamiento / Ficha de plaga \
 \end{tabularx}
 \end{table}
 
-\noindent
-\textbf{Aquí va la imagen del DFD Nivel 0.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFD0.drawio.pdf}
+\caption{DFD Nivel 0 -- Diagrama de contexto del SIMPA}
+\label{fig:dfd-nivel0}
+\end{figure}
 
 \section{DFD Nivel 1}
 
@@ -505,8 +516,12 @@ P6 & Generar alertas y reportes & D9 Alertas, D10 Reportes \\
 \end{tabularx}
 \end{table}
 
-\noindent
-\textbf{Aquí va la imagen del DFD Nivel 1.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFD1.drawio.pdf}
+\caption{DFD Nivel 1 -- Descomposición en subprocesos del SIMPA}
+\label{fig:dfd-nivel1}
+\end{figure}
 
 \section{DFD esencial}
 
@@ -515,8 +530,12 @@ la detección de plagas y enfermedades por imagen (RF-07/RF-08), separando la l�
 (qué transformación de negocio ocurre) de la implementación tecnológica concreta (protocolo REST,
 formato JSON, proveedor del modelo de IA).
 
-\noindent
-\textbf{Aquí va la imagen del DFD Esencial.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFDEsencial.drawio.pdf}
+\caption{DFD esencial -- Detección de plaga o enfermedad por imagen (RF-07/RF-08)}
+\label{fig:dfd-esencial}
+\end{figure}
 
 \section{Diagrama de actividades UML}
 
@@ -527,8 +546,12 @@ almacenamiento de la imagen y el envío al servicio de IA, y un flujo de objeto 
 \textit{ResultadoIA} desde el servicio hasta el nodo de generación de alerta, conforme a las buenas
 prácticas de modelado de comportamiento descritas por Pohl~\cite{pohl2025}.
 
-\noindent
-\textbf{Aquí va la imagen del Diagrama de Actividades.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Actividades.drawio.pdf}
+\caption{Diagrama de actividades UML del caso de uso CU-01}
+\label{fig:diagrama-actividades}
+\end{figure}
 \chapter{Modelo de comportamiento: máquina de estados y secuencia}
 
 \section{Selección de la entidad}
@@ -567,8 +590,12 @@ El estado \textit{EnCrecimiento} se modela como estado compuesto con dos subesta
 (\textit{Vegetativo} y \textit{PreAntesis}), reflejando que durante el crecimiento el lote puede
 recibir análisis de suelo y foliar sin que ello constituya un cambio de etapa principal.
 
-\noindent
-\textbf{Aquí va la imagen del Diagrama de Máquina de Estados.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Estados.drawio.pdf}
+\caption{Diagrama de máquina de estados UML del ciclo de vida de Lote}
+\label{fig:diagrama-estados}
+\end{figure}
 
 \section{Diagrama de secuencia}
 
@@ -594,8 +621,12 @@ válida) y un fragmento \texttt{loop} para el reintento de captura cuando la ima
   \end{itemize}
 \end{enumerate}
 
-\noindent
-\textbf{Aquí va la imagen del Diagrama de Secuencia.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Secuencia.drawio.pdf}
+\caption{Diagrama de secuencia UML del caso de uso CU-01}
+\label{fig:diagrama-secuencia}
+\end{figure}
 \chapter{Matriz de trazabilidad y tabla comparativa}
 \label{sec:trazabilidad}
 
@@ -812,21 +843,77 @@ traza RD-05 $\rightarrow$ NFR-03 en la matriz de trazabilidad de la \Cref{tab:ma
 \end{longtable}
 \chapter{Exportaciones originales de todos los diagramas (alta resolución)}
 
-Los diagramas fuente en formato editable (draw.io / StarUML) y sus exportaciones en alta resolución
-(PNG/SVG) se encuentran versionados en el repositorio del proyecto, en la carpeta
-\texttt{evidencias/diagramas/}, referenciado desde el repositorio general del equipo AHMRV:
-\url{https://github.com/AlanNVR/Villafuerte_Grupo_AHMRV/tree/main/AHMRV}. A continuación se listan los
-marcadores de las figuras que deben insertarse en dicha carpeta y enlazarse en este documento:
+Los diagramas fuente en formato editable (draw.io ) y sus exportaciones en alta resolución
+(PNG/JPEG) se encuentran versionados en el repositorio del proyecto, en la carpeta
+\texttt{diagrama/}, referenciado desde el repositorio general del equipo I:
 
 \begin{itemize}
-  \item \textbf{Aquí va la imagen del Diagrama ER.}
-  \item \textbf{Aquí va la imagen del Diagrama de Clases UML.}
-  \item \textbf{Aquí va la imagen del DFD Nivel 0.}
-  \item \textbf{Aquí va la imagen del DFD Nivel 1.}
-  \item \textbf{Aquí va la imagen del DFD Esencial.}
-  \item \textbf{Aquí va la imagen del Diagrama de Actividades.}
-  \item \textbf{Aquí va la imagen del Diagrama de Máquina de Estados.}
-  \item \textbf{Aquí va la imagen del Diagrama de Secuencia.}
+  \item Diagrama ER (\texttt{imagenes/Diagrama-Clases.drawio.pdf}) -- Figura~\ref{fig:diagrama-er}, página~\pageref{fig:diagrama-er}.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Clases.drawio.pdf}
+\label{fig:diagrama-estados}
+\end{figure}
+
+
+  
+  \item Diagrama de Clases UML (\texttt{Entidad-Relacion.drawio.pdf}) -- Figura~\ref{fig:diagrama-clases}, página~\pageref{fig:diagrama-clases}.
+
+ \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Entidad-Relacion.drawio.pdf}
+
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item DFD Nivel 0 (\texttt{imagenes/Diagrama-DFD0.drawio.pdf}) -- Figura~\ref{fig:dfd-nivel0}, página~\pageref{fig:dfd-nivel0}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFD0.drawio.pdf}
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item DFD Nivel 1 (\texttt{imagenes/Diagrama-DFD1.drawio.pdf}) -- Figura~\ref{fig:dfd-nivel1}, página~\pageref{fig:dfd-nivel1}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFD1.drawio.pdf}
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item DFD Esencial (\texttt{imagenes/Diagrama-DFDEsencial.drawio.pdf}) -- Figura~\ref{fig:dfd-esencial}, página~\pageref{fig:dfd-esencial}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-DFDEsencial.drawio.pdf}
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item Diagrama de Actividades (\texttt{imagenes/Diagrama-Actividades.drawio}) -- Figura~\ref{fig:diagrama-actividades}, página~\pageref{fig:diagrama-actividades}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Actividades.drawio}
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item Diagrama de Máquina de Estados (\texttt{imagenes/Diagrama-Estados.drawiof}) -- Figura~\ref{fig:diagrama-estados}, página~\pageref{fig:diagrama-estados}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Estados.drawio}
+\label{fig:diagrama-estados}
+\end{figure}
+
+  \item Diagrama de Secuencia (\texttt{imagenes/Diagrama-Secuencia.drawio.pdf}) -- Figura~\ref{fig:diagrama-secuencia}, página~\pageref{fig:diagrama-secuencia}.
+
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Diagrama-Secuencia.drawio.pdf}
+\label{fig:diagrama-estados}
+\end{figure}
+
 \end{itemize}
 \chapter{Referencias IEEE y declaración de uso de IA}
 
@@ -843,13 +930,18 @@ y (iv) localizar y verificar mediante búsqueda web las referencias bibliográfi
 real citadas en las conclusiones y en el marco teórico. Ningún diagrama fue generado como imagen por la
 IA: todos los lugares donde debe insertarse un diagrama construido en herramienta CASE (draw.io o
 StarUML) se dejaron marcados explícitamente con el texto correspondiente. La revisión crítica final del
-contenido, su coherencia con el PFC y la verificación de los DOI reales quedó a cargo del equipo
-AHMRV.
+contenido, su coherencia con el PFC y la verificación de los DOI reales quedó a cargo del equipo I.
 
 \section{Índice de referencias en formato IEEE}
 
 Las referencias se generan automáticamente a partir de \texttt{referencias.bib} mediante
 \texttt{ieeetr}. Se listan a continuación de forma resumida para verificación rápida:
+   \begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{imagenes/Referencias.png}
+\label{fig:diagrama-estados}
+\end{figure}
+
 
 \begin{enumerate}[label=\lbrack{}\arabic*\rbrack{}]
   \item IEEE/ISO/IEC 29148:2018 -- Requirements engineering.
@@ -861,8 +953,8 @@ Las referencias se generan automáticamente a partir de \texttt{referencias.bib}
   \item PMBoK Guide, 7.\textsuperscript{a} ed., PMI, 2021.
   \item IREB CPRE Foundation Level Syllabus v3.1, 2023.
   \item L. A. Maciaszek, \textit{Requirements Analysis and System Design}, 3.\textsuperscript{a} ed.,
-  Addison-Wesley, 2007.
-  \item D. Harel, ``Statecharts,'' \textit{Science of Computer Programming}, 1987,
+  Addison-Wesley, 2020.
+  \item D. Harel, ``Statecharts,'' \textit{Science of Computer Programming}, 2020,
   doi: 10.1016/0167-6423(87)90035-9.
   \item E. Hull, K. Jackson, J. Dick, \textit{Requirements Engineering}, 3.\textsuperscript{a} ed.,
   Springer, 2011, doi: 10.1007/978-1-84996-405-0.
