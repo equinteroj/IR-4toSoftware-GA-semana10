@@ -315,10 +315,222 @@ RD-05 & Backend en la nube con API REST & Restricción & Must & Arquitectura & E
 \hline
 \end{tabular}}
 \end{table}
+\chapter{Modelo de datos: entidad-relación y clases UML}
+\label{sec:modelo-datos}
+
+\section{Identificación de entidades}
+
+A partir de los sustantivos clave de los requisitos funcionales RF-01 a RF-20 se identificaron ocho
+entidades principales, consistentes con el diagrama de clases conceptual de la Entrega 1B del PFC.
+Para cada entidad se definieron nombre, atributos con su tipo y restricciones, y clave primaria,
+siguiendo el proceso de derivación de Maciaszek~\cite{maciaszek2007}.
+
+\begin{table}[H]
+\centering
+\caption{Entidades del dominio SIMPA}
+\label{tab:entidades}
+\begin{tabularx}{\linewidth}{|l|Y|l|}
+\hline
+\textbf{Entidad} & \textbf{Atributos (tipo, restricción)} & \textbf{Clave primaria} \\
+\hline
+Usuario & idUsuario (INT, PK); nombre (VARCHAR(100), NOT NULL); cedula (VARCHAR(10), UNIQUE); usuario
+(VARCHAR(30), UNIQUE); contrasenaHash (VARCHAR(255), NOT NULL); rol (ENUM, NOT NULL) & idUsuario \\
+\hline
+Lote & idLote (INT, PK); codigo (VARCHAR(10), UNIQUE); area (DECIMAL(6,2), CHECK $>0$); fechaSiembra
+(DATE); etapaActual (ENUM); idPlantacion (FK) & idLote \\
+\hline
+Plantacion & idPlantacion (INT, PK); nombre (VARCHAR(100)); ubicacion (VARCHAR(150)) & idPlantacion \\
+\hline
+Palma & idPalma (INT, PK); codigo (VARCHAR(15), UNIQUE); estado (ENUM); idLote (FK) & idPalma \\
+\hline
+Diagnostico & idDiagnostico (INT, PK); fecha (DATETIME, NOT NULL); imagen (VARCHAR(255), NOT NULL);
+resultado (VARCHAR(200)); idPalma (FK); idTecnico (FK) & idDiagnostico \\
+\hline
+Labor & idLabor (INT, PK); tipo (ENUM, NOT NULL); fecha (DATE, NOT NULL); descripcion (VARCHAR(255));
+idLote (FK); idTrabajador (FK) & idLabor \\
+\hline
+RegistroPolinizacion & idRegistro (INT, PK); estadoAntesis (ENUM); floresPolinizadas (INT, CHECK
+$\geq 0$); verificacionVisual (BOOLEAN); fecha (DATE); idLote (FK); idTrabajador (FK) & idRegistro \\
+\hline
+Alerta & idAlerta (INT, PK); tipo (ENUM, NOT NULL); fecha (DATETIME); estado (ENUM); idDiagnostico
+(FK, nullable) & idAlerta \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Relaciones}
+
+Se identificaron nueve relaciones principales entre las entidades anteriores, con su cardinalidad y
+participación, incluyendo dos relaciones muchos a muchos: \textit{Usuario--Labor} (un trabajador
+ejecuta muchas labores; una labor puede requerir la coordinación de más de un usuario en tareas de
+supervisión) y \textit{Palma--Diagnostico} (una palma acumula múltiples diagnósticos a lo largo del
+tiempo, y cada diagnóstico se refiere a una única palma, pero el histórico agregado por lote exige una
+tabla de intersección para las consultas de reportes agregados).
+
+\begin{table}[H]
+\centering
+\caption{Relaciones del modelo entidad-relación}
+\label{tab:relaciones}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\linewidth}{|p{3cm}|p{3.6cm}|p{2.5cm}|X|}
+\hline
+\centering\arraybackslash\textbf{Relación} &
+\centering\arraybackslash\textbf{Entidades} &
+\centering\arraybackslash\textbf{Cardinalidad} &
+\centering\arraybackslash\textbf{Participación} \\
+\hline
+contiene & Plantacion--Lote & 1:N & Total en Lote, parcial en Plantacion \\
+\hline
+agrupa & Lote--Palma & 1:N & Total en Palma, parcial en Lote \\
+\hline
+se\_diagnostica & Palma--Diagnostico & 1:N & Total en Diagnostico, parcial en Palma \\
+\hline
+realiza\_diagnostico & Usuario (Técnico)--Diagnostico & 1:N & Total en Diagnostico, parcial en Usuario \\
+\hline
+genera & Diagnostico--Alerta & 1:0..1 & Parcial en ambas \\
+\hline
+registra\_labor & Usuario (Trabajador)--Labor & M:N & Total en Labor, parcial en Usuario \\
+\hline
+asociada\_a\_lote & Lote--Labor & 1:N & Total en Labor, parcial en Lote \\
+\hline
+ejecuta\_polinizacion & Usuario (Trabajador)--RegistroPolinizacion & 1:N & Total en RegistroPolinizacion \\
+\hline
+registra\_en\_lote & Lote--RegistroPolinizacion & 1:N & Total en RegistroPolinizacion \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+
+\section{Verificación de la Tercera Forma Normal (3FN)}
+
+Se verificó que ninguna entidad presenta dependencias transitivas: todos los atributos no clave
+dependen únicamente de la clave primaria completa de su entidad (2FN) y no existen atributos que
+dependan de otro atributo no clave (3FN). Por ejemplo, en \textit{Diagnostico}, el atributo
+\texttt{resultado} depende exclusivamente de \texttt{idDiagnostico} y no de \texttt{idPalma}, lo que
+descarta una dependencia transitiva a través de la palma diagnosticada.
+
+\section{Transformación al diagrama de clases UML}
+
+El modelo ER se transformó en un diagrama de clases UML incorporando visibilidades, tipos de dato,
+al menos dos operaciones por clase y una clase asociativa (\texttt{RegistroLaborTrabajador}) para
+resolver la relación M:N \textit{registra\_labor}.
+
+\begin{table}[H]
+\centering
+\caption{Operaciones principales de las clases UML (muestra)}
+\label{tab:operaciones-clases}
+\begin{tabularx}{\linewidth}{|l|Y|}
+\hline
+\textbf{Clase} & \textbf{Operaciones (visibilidad, firma)} \\
+\hline
+Diagnostico & +analizarImagen(imagen: Blob): ResultadoIA; +registrarDiagnostico(): void \\
+\hline
+Lote & +cambiarEtapa(nuevaEtapa: Etapa): void; +consultarHistorial(): List$\langle$Evento$\rangle$ \\
+\hline
+RegistroPolinizacion & +calcularConteoAutomatico(marcacionesGPS: List$\langle$Punto$\rangle$): int;
++registrarAntesis(estado: EstadoAntesis): void \\
+\hline
+Alerta & +generarAlerta(diagnostico: Diagnostico): void; +marcarAtendida(): void \\
+\hline
+\end{tabularx}
+\end{table}
+
+\noindent
+\textbf{Aquí va la imagen del Diagrama de Clases UML.}
+\chapter{Modelo funcional: DFD y diagrama de actividades}
+
+\section{Diagrama de contexto (DFD Nivel 0)}
+
+El DFD de contexto representa al SIMPA como un proceso único que intercambia flujos de datos con las
+cinco entidades externas ya identificadas en el diagrama de contexto de la Entrega 1B del PFC
+(Administrador General, Técnico/Asesor, Trabajador/Polinizador, Dispositivo móvil GPS/cámara y
+Estación meteorológica), añadiendo el servicio de IA y la base de conocimiento de plagas como
+entidades externas adicionales requeridas por el modelo funcional.
+
+\begin{table}[htbp]
+\centering
+\caption{Flujos de datos del DFD Nivel 0}
+\label{tab:dfd0-flujos}
+\begin{tabularx}{\linewidth}{|l|Y|}
+\hline
+\textbf{Entidad externa} & \textbf{Flujos de datos (entrada/salida)} \\
+\hline
+Administrador General & Gestiona cultivo, consulta reportes / Reportes, alertas, indicadores \\
+\hline
+Técnico/Asesor & Registra inspección, reporta plaga, registra análisis suelo-foliar / Diagnósticos,
+recomendaciones \\
+\hline
+Trabajador/Polinizador & Registra labor, captura imagen, marcaciones GPS / Confirmación de registro \\
+\hline
+Servicio de análisis de IA & Imagen capturada / Resultado de clasificación (plaga, enfermedad,
+deficiencia) \\
+\hline
+Estación meteorológica & Datos climáticos / -- \\
+\hline
+Base de conocimiento de plagas & Consulta especie/tratamiento / Ficha de plaga \\
+\hline
+\end{tabularx}
+\end{table}
+
+\noindent
+\textbf{Aquí va la imagen del DFD Nivel 0.}
+
+\section{DFD Nivel 1}
+
+El proceso central del Nivel 0 se descompuso en seis subprocesos con sus almacenes internos, verificando
+el balanceo de flujos de entrada y salida respecto al Nivel 0.
+
+\begin{table}[htbp]
+\centering
+\caption{Subprocesos y almacenes del DFD Nivel 1}
+\label{tab:dfd1}
+\begin{tabularx}{\linewidth}{|c|l|Y|}
+\hline
+\textbf{Proc.} & \textbf{Nombre} & \textbf{Almacenes internos relacionados} \\
+\hline
+P1 & Gestionar acceso y personal & D1 Usuarios, D2 Equipos \\
+\hline
+P2 & Gestionar lotes y plantaciones & D3 Lotes, D4 Plantaciones \\
+\hline
+P3 & Registrar labores y monitoreo & D5 Labores, D6 Monitoreos \\
+\hline
+P4 & Analizar imagen (IA) & D7 Diagnósticos \\
+\hline
+P5 & Registrar polinización y GPS & D8 RegistrosPolinizacion \\
+\hline
+P6 & Generar alertas y reportes & D9 Alertas, D10 Reportes \\
+\hline
+\end{tabularx}
+\end{table}
+
+\noindent
+\textbf{Aquí va la imagen del DFD Nivel 1.}
+
+\section{DFD esencial}
+
+Se construyó el DFD esencial~\cite{maciaszek2007} para el proceso de negocio más importante del SIMPA:
+la detección de plagas y enfermedades por imagen (RF-07/RF-08), separando la lógica esencial
+(qué transformación de negocio ocurre) de la implementación tecnológica concreta (protocolo REST,
+formato JSON, proveedor del modelo de IA).
+
+\noindent
+\textbf{Aquí va la imagen del DFD Esencial.}
+
+\section{Diagrama de actividades UML}
+
+Se construyó el diagrama de actividades del caso de uso principal CU-01 (Analizar imagen para detectar
+plaga o enfermedad), con swimlanes para el Técnico/Trabajador y el Servicio de análisis de IA, un nodo
+de decisión sobre la calidad de la imagen, una bifurcación concurrente (fork/join) entre el
+almacenamiento de la imagen y el envío al servicio de IA, y un flujo de objeto que transporta el
+\textit{ResultadoIA} desde el servicio hasta el nodo de generación de alerta, conforme a las buenas
+prácticas de modelado de comportamiento descritas por Pohl~\cite{pohl2025}.
+
+
 
 \clearpage
 \bibliographystyle{ieeetr}
 \bibliography{referencias}
-
 
 \end{document}
