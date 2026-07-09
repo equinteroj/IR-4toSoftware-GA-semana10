@@ -36,7 +36,7 @@
 
 \hypersetup{
   colorlinks=true,
-  linkcolor=black,
+  linkcolor=blue!50!black,
   citecolor=green!50!black,
   urlcolor=blue!70!black
 }
@@ -527,10 +527,356 @@ almacenamiento de la imagen y el envío al servicio de IA, y un flujo de objeto 
 \textit{ResultadoIA} desde el servicio hasta el nodo de generación de alerta, conforme a las buenas
 prácticas de modelado de comportamiento descritas por Pohl~\cite{pohl2025}.
 
+\noindent
+\textbf{Aquí va la imagen del Diagrama de Actividades.}
+\chapter{Modelo de comportamiento: máquina de estados y secuencia}
 
+\section{Selección de la entidad}
+
+Entre las entidades del dominio, \textit{Lote} es la que presenta el ciclo de vida más rico, con
+cinco estados principales y un estado compuesto, por lo que se seleccionó para el modelado de
+máquina de estados, siguiendo el formalismo de statecharts de Harel~\cite{harel1987}.
+
+\section{Diagrama de máquina de estados}
+
+\begin{table}[H]
+\centering
+\caption{Estados, eventos y acciones del ciclo de vida de Lote}
+\label{tab:estados}
+\begin{tabularx}{\linewidth}{|>{\hsize=0.6\hsize}X|>{\hsize=1.2\hsize}X|>{\hsize=1.2\hsize}X|}
+\hline
+\textbf{Estado} & \textbf{Evento de entrada [condición]} & \textbf{Acción} \\
+\hline
+Sembrado & registrarLote() & inicializarEtapaActual('Sembrado') \\
+\hline
+\multirow{2}{*}{EnCrecimiento} & \multirow{2}{*}{tiempoTranscurrido [$\geq$ 12 meses]} & \multirow{2}{*}{actualizarEtapa('EnCrecimiento')} \\
+(compuesto: \{Vegetativo, PreAntesis\}) & & \\
+\hline
+EnPolinizacion & antesisDetectada() & habilitarRegistroPolinizacion() \\
+\hline
+EnFructificacion & polinizacionCompletada() [floresPolinizadas $>$ 0] & iniciarSeguimientoRacimo() \\
+\hline
+ListoParaCosecha & censoFlores() [rendimientoEstimado $\geq$ umbral] & generarAlertaCosecha() \\
+\hline
+Cosechado & registrarCosecha() & cerrarCicloProductivo() \\
+\hline
+\end{tabularx}
+\end{table}
+
+El estado \textit{EnCrecimiento} se modela como estado compuesto con dos subestados
+(\textit{Vegetativo} y \textit{PreAntesis}), reflejando que durante el crecimiento el lote puede
+recibir análisis de suelo y foliar sin que ello constituya un cambio de etapa principal.
+
+\noindent
+\textbf{Aquí va la imagen del Diagrama de Máquina de Estados.}
+
+\section{Diagrama de secuencia}
+
+Se construyó el diagrama de secuencia UML del escenario principal del caso de uso CU-01 (Analizar
+imagen para detectar plaga o enfermedad), con cinco líneas de vida: \textit{Técnico/Trabajador},
+\textit{AppMóvil}, \textit{APIREST}, \textit{ServicioIA} y \textit{BaseDeDatos}. El diagrama incluye
+un fragmento \texttt{alt} para diferenciar la respuesta según la calidad de la imagen (válida/no
+válida) y un fragmento \texttt{loop} para el reintento de captura cuando la imagen es rechazada.
+
+\begin{enumerate}[label=\arabic*.]
+\item Técnico/Trabajador $\rightarrow$ AppMóvil: seleccionarLote(); capturarImagen()
+\item AppMóvil $\rightarrow$ APIREST: enviarImagen(imagen, idLote)
+\item \texttt{alt} [imagen válida]
+  \begin{itemize}
+    \item APIREST $\rightarrow$ ServicioIA: analizarImagen(imagen)
+    \item ServicioIA $\rightarrow$ APIREST: resultadoIA(diagnostico)
+    \item APIREST $\rightarrow$ BaseDeDatos: guardarDiagnostico(diagnostico)
+    \item APIREST $\rightarrow$ AppMóvil: mostrarResultado(diagnostico)
+  \end{itemize}
+\item \texttt{alt} [imagen no válida] \texttt{loop} [hasta 3 intentos]
+  \begin{itemize}
+    \item APIREST $\rightarrow$ AppMóvil: solicitarNuevaCaptura()
+  \end{itemize}
+\end{enumerate}
+
+\noindent
+\textbf{Aquí va la imagen del Diagrama de Secuencia.}
+\chapter{Matriz de trazabilidad y tabla comparativa}
+\label{sec:trazabilidad}
+
+\section{Matriz de trazabilidad}
+
+La matriz de trazabilidad enlaza cada requisito funcional con los casos de uso, las clases UML, los
+procesos del DFD, las actividades y los estados en los que se manifiesta, siguiendo el requisito de
+trazabilidad bidireccional de IEEE/ISO/IEC 15288:2023~\cite{ieee15288}.
+
+\begin{landscape}
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Matriz de trazabilidad RF vs. modelos UML/DFD}
+\label{tab:matriz-trazabilidad}
+\begin{tabularx}{\linewidth}{|>{\hsize=0.5\hsize}X|>{\hsize=1.0\hsize}X|>{\hsize=1.0\hsize}X|>{\hsize=0.7\hsize}X|>{\hsize=0.7\hsize}X|>{\hsize=1.1\hsize}X|}
+\hline
+\textbf{RF} & \textbf{Caso de uso} & \textbf{Clase(s) UML} & \textbf{Proceso DFD} & \textbf{Actividad} & \textbf{Estado} \\
+\hline
+RF-01 & Iniciar sesión & Usuario & P1 & -- & -- \\
+RF-02 & Gestionar lotes & Lote, Plantacion & P2 & -- & Sembrado \\
+RF-03 & Gestionar personal & Usuario & P1 & -- & -- \\
+RF-04 & Registrar labor & Labor, RegistroLaborTrabajador & P3 & Nodo "Registrar labor" & -- \\
+RF-05 & Registrar monitoreo & Diagnostico & P3 & -- & -- \\
+RF-06 & Detalle de lote & Lote & P2 & -- & EnCrecimiento/EnPolinizacion \\
+RF-07 & Analizar imagen & Diagnostico, Palma & P4 & Todo CU-01 & -- \\
+RF-08 & Diagnóstico nutricional & Diagnostico, Palma & P4 & Similar a CU-01 & -- \\
+RF-09 & Recomendar control & Diagnostico & P4 & Nodo "Recomendar control" & -- \\
+RF-10 & Gestionar variedades & Lote, Palma & P2 & -- & -- \\
+RF-11 & Registrar análisis & Diagnostico & P3 & -- & -- \\
+RF-12 & Generar alerta & Alerta & P6 & Nodo join $\rightarrow$ Alerta & -- \\
+RF-13 & Registrar polinización & RegistroPolinizacion & P5 & Todo CU-03 & EnPolinizacion \\
+RF-14 & Conteo por GPS & RegistroPolinizacion & P5 & Nodo "Calcular conteo" & -- \\
+RF-15 & Monitorear recorridos & RegistroPolinizacion & P5 & -- & -- \\
+RF-16 & Evaluar desempeño & Usuario, Labor & P6 & -- & -- \\
+RF-17 & Registrar/consultar clima & -- (externo) & P6 & -- & -- \\
+RF-18 & Estimar producción & Lote & P6 & -- & ListoParaCosecha \\
+RF-19 & Generar reporte & Reporte & P6 & Todo CU-05 & -- \\
+RF-20 & Consultar historial & Diagnostico, Labor & P6 & -- & -- \\
+\hline
+\end{tabularx}
+\end{table}
+\end{landscape}
+
+\subsection{Análisis de cobertura}
+
+De la matriz anterior se observa que todos los requisitos funcionales (RF-01 a RF-20) cuentan con al
+menos un caso de uso, una clase UML y un proceso DFD asociado, por lo que no se identifican requisitos
+sin cobertura (\textit{gaps}). Sin embargo, tres procesos del DFD Nivel 1 (P1, P2, P6) agrupan
+varios requisitos sin una actividad UML dedicada, lo cual es consistente con su naturaleza
+transaccional (alta cohesión de tipo CRUD) y no constituye sobreespecificación. No se detectaron
+modelos --clases, procesos o estados-- sin ningún requisito funcional asociado, por lo que tampoco se
+identifican casos de \textit{gold plating}~\cite{ieee29148}.
+
+\section{Tabla comparativa de las tres perspectivas de modelado}
+
+\begin{table}[htbp]
+\centering
+\caption{Comparación de las perspectivas de datos, funcional y de comportamiento}
+\label{tab:comparativa}
+\begin{tabularx}{\linewidth}{|>{\hsize=0.8\hsize}X|>{\hsize=1.1\hsize}X|>{\hsize=1.1\hsize}X|>{\hsize=1.0\hsize}X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Criterio}} & 
+\multicolumn{1}{c|}{\textbf{Datos}} & 
+\multicolumn{1}{c|}{\textbf{Funcional}} & 
+\multicolumn{1}{c|}{\textbf{Comportamiento}} \\
+\multicolumn{1}{|c|}{} & 
+\multicolumn{1}{c|}{\textbf{(ER/Clases)}} & 
+\multicolumn{1}{c|}{\textbf{(DFD/Actividades)}} & 
+\multicolumn{1}{c|}{\textbf{(Estados/Secuencia)}} \\
+\hline
+Perspectiva cubierta & Estructura estática de la información y sus relaciones. & Transformación de datos por procesos y su descomposición jerárquica. & Evolución temporal de una entidad y orden de interacción entre objetos. \\
+\hline
+Notación & Entidad-relación (Crow's Foot) y clases UML. & DFD (Yourdon/Gane-Sarson) y actividades UML. & Statecharts de Harel~\cite{harel1987} y secuencia UML. \\
+\hline
+Requisitos que ayuda a descubrir & Atributos faltantes, entidades implícitas, relaciones M:N no declaradas (p.ej., RF-02, RF-10). & Procesos huérfanos, flujos de datos no balanceados, RF de generación de reportes (RF-19). & Transiciones no contempladas, condiciones de guarda ausentes, RF de polinización (RF-13, RF-14). \\
+\hline
+Limitaciones & No expresa el orden temporal ni las condiciones de activación de los procesos. & No captura el ciclo de vida completo de una única entidad ni las condiciones de guarda entre estados. & No representa por sí sola la estructura completa de datos ni la descomposición jerárquica de procesos. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\chapter{Conclusiones}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item La revisión del SRS parcial de la Entrega 1B del SIMPA, contrastada contra los criterios de
+calidad de IEEE/ISO/IEC 29148:2018~\cite{ieee29148}, permitió identificar seis defectos concretos
+--principalmente de ambigüedad y verificabilidad--, cuya corrección mediante la sintaxis
+EARS~\cite{mavin2009} incrementó la precisión operacional de los requisitos sin alterar su alcance
+funcional original.
+
+\item El modelo de datos, compuesto por ocho entidades y nueve relaciones --incluidas dos relaciones
+muchos a muchos--, resultó consistente con el diagrama de clases conceptual de dieciocho clases
+construido en la Entrega 1B, confirmando que la perspectiva de datos del SIMPA está suficientemente
+estabilizada para avanzar hacia el diseño detallado.
+
+\item El modelo funcional, expresado en tres niveles de DFD y un diagrama de actividades, evidenció
+que el proceso de análisis de imagen por inteligencia artificial (RF-07/RF-08) es el núcleo
+transformador del sistema, lo cual es coherente con su clasificación \textit{Must} en la priorización
+MoSCoW de la Entrega 1B y con la evidencia empírica reportada en la literatura reciente sobre
+clasificación de enfermedades de palma mediante redes convolucionales~\cite{abuzanona2022,hamdani2021}.
+
+\item El modelo de comportamiento reveló que la entidad \textit{Lote} concentra la mayor complejidad
+de estados del dominio, y que el escenario de análisis de imagen (CU-01) requiere fragmentos
+condicionales (\texttt{alt}) y de repetición (\texttt{loop}) para representar adecuadamente los
+casos de imagen rechazada, un detalle no explícito en la especificación textual original.
+
+\item La matriz de trazabilidad de veinte requisitos funcionales frente a los modelos de datos,
+funcionales y de comportamiento no reveló requisitos sin cobertura ni artefactos de modelado sin
+respaldo en un requisito, lo que confirma la completitud del conjunto de modelos entregado en esta
+práctica y su alineación con los principios de trazabilidad de IEEE/ISO/IEC 15288:2023~\cite{ieee15288}.
+
+\end{enumerate}
+
+Como trabajo futuro se recomienda profundizar la validación empírica de los requisitos no funcionales
+de desempeño de la inteligencia artificial (NFR-02) mediante pruebas de campo con conectividad real,
+apoyándose en arquitecturas de IoT agrícola ya documentadas en la literatura~\cite{chamara2022}, y
+extender el diagrama de máquina de estados a la entidad \textit{Diagnostico} para modelar de forma
+explícita su ciclo de revisión y cierre por parte del técnico responsable.
 
 \clearpage
 \bibliographystyle{ieeetr}
 \bibliography{referencias}
+
+\appendix
+\chapter{Tabla de atributos completa de todos los RF y RNF}
+
+\begin{longtable}{|
+p{1.2cm}|
+p{4.4cm}|
+p{0.8cm}|
+p{1.7cm}|
+p{1.3cm}|
+p{2cm}|
+p{1.5cm}|
+p{0.8cm}|}
+\hline
+\textbf{ID} & \textbf{Descripción} & \textbf{Tipo} & \textbf{MoSCoW} & \textbf{Fuente} &
+\textbf{Estabilidad} & \textbf{Estado} & \textbf{Verif.} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Descripción} & \textbf{Tipo} & \textbf{MoSCoW} & \textbf{Fuente} &
+\textbf{Estabilidad} & \textbf{Estado} & \textbf{Verif.} \\
+\hline
+\endhead
+RF-01 & Autenticación y control de acceso por rol & RF & Must & EV-01, EV-04 & Estable & Aprobado & S \\ \hline
+RF-02 & Gestión de plantaciones y lotes & RF & Must & EV-01, EV-02, EV-04 & Estable & Aprobado & S \\ \hline
+RF-03 & Gestión de personal y equipos de trabajo & RF & Must & EV-01 & Estable & Aprobado & S \\ \hline
+RF-04 & Registro de labores agrícolas & RF & Must & EV-01, EV-02, EV-03 & Estable & Aprobado & S \\ \hline
+RF-05 & Registro de monitoreo fitosanitario diario & RF & Must & EV-01, EV-02, EV-04 & Estable & Aprobado & S \\ \hline
+RF-06 & Seguimiento de etapas del cultivo & RF & Should & EV-01 & Estable & Aprobado & S \\ \hline
+RF-07 & Detección de plagas y enfermedades por imagen (IA) & RF & Must & EV-01, EV-02 & Volátil & Aprobado & S \\ \hline
+RF-08 & Diagnóstico de deficiencias nutricionales por imagen (IA) & RF & Must & EV-02 & Volátil & Aprobado & S \\ \hline
+RF-09 & Ficha de plaga: especie, ciclo y recomendación de control & RF & Should & EV-01, EV-02 & Volátil & Aprobado & S \\ \hline
+RF-10 & Gestión de variedades de palma & RF & Could & EV-01, EV-02 & Estable & Aprobado & S \\ \hline
+RF-11 & Registro de análisis de suelo y foliar & RF & Should & EV-02 & Estable & Aprobado & S \\ \hline
+RF-12 & Generación de alertas tempranas & RF & Must & EV-01, EV-02 & Estable & Aprobado & S \\ \hline
+RF-13 & Registro del proceso de polinización & RF & Must & EV-03 & Estable & Aprobado & S \\ \hline
+RF-14 & Conteo automático de flores polinizadas por GPS & RF & Must & EV-03 & Volátil & Aprobado & S \\ \hline
+RF-15 & Registro y monitoreo de recorridos del personal (GPS) & RF & Should & EV-01, EV-02, EV-03 & Estable & Aprobado & S \\ \hline
+RF-16 & Evaluación de desempeño del personal & RF & Should & EV-01, EV-02, EV-03 & Estable & Aprobado & S \\ \hline
+RF-17 & Registro y consulta de datos climáticos & RF & Should & EV-01, EV-02, EV-03 & Estable & Aprobado & S \\ \hline
+RF-18 & Estimación de producción y rendimiento & RF & Must & EV-01, EV-02 & Volátil & Aprobado & S \\ \hline
+RF-19 & Generación de reportes & RF & Must & EV-01, EV-02 & Estable & Aprobado & S \\ \hline
+RF-20 & Historial de actividades, diagnósticos y eventos & RF & Should & EV-01 & Estable & Aprobado & S \\ \hline
+NFR-01 & Eficiencia de desempeño ($\leq$ 3 s, 50 usuarios concurrentes) & RNF & Should & Derivado & Estable & Aprobado & S \\ \hline
+NFR-02 & Eficiencia de desempeño de la IA ($\leq$ 10 s, P95) & RNF & Must & EV-01, EV-02 & Volátil & Aprobado & S \\ \hline
+NFR-03 & Disponibilidad del backend $\geq$ 99\% mensual & RNF & Should & Derivado & Estable & Aprobado & S \\ \hline
+NFR-04 & Operación offline con sincronización sin pérdida & RNF & Must & EV-01 & Estable & Aprobado & S \\ \hline
+NFR-05 & Usabilidad para usuarios sin experiencia previa & RNF & Must & EV-01, EV-02 & Estable & Aprobado & S \\ \hline
+NFR-06 & Seguridad: hash de contraseñas y TLS 1.2+ & RNF & Must & Derivado & Estable & Aprobado & S \\ \hline
+NFR-07 & Compatibilidad Android 9.0+ y navegadores recientes & RNF & Should & Derivado & Estable & Aprobado & S \\ \hline
+NFR-08 & Precisión GPS $\leq$ 10 m, muestreo $\leq$ 30 s & RNF & Should & EV-03 & Estable & Aprobado & S \\ \hline
+NFR-09 & Cobertura de pruebas $\geq$ 60\% & RNF & Could & Derivado & Volátil & Aprobado & S \\ \hline
+\end{longtable}
+
+
+\chapter{Registro de defectos del SRS con correcciones aplicadas}
+
+\begin{longtable}{|c|p{4cm}|c|p{5.5cm}|}
+\hline
+\textbf{ID} & \textbf{Defecto} & \textbf{Tipo} & \textbf{Corrección aplicada (EARS)} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Defecto} & \textbf{Tipo} & \textbf{Corrección aplicada (EARS)} \\
+\hline
+\endhead
+D-01 & RF-04 mezcla varios subtipos de labor en un único enunciado & Ambigüedad / no singular &
+\textit{While} the user is authenticated and the lot exists, the SIMPA \textit{shall} allow the
+registration of a labor of type irrigation, pollination, phytosanitary control, or maintenance. \\
+\hline
+D-02 & RF-06 no especifica el evento disparador del cambio de etapa & No verificable & \textit{When}
+the administrator registers a stage change for a lot, the SIMPA \textit{shall} update the lot's
+current stage and log the transition. \\
+\hline
+D-03 & RF-09 no declara explícitamente su precondición en el enunciado & Incompletitud &
+\textit{While} a pest diagnosis exists for a lot, the SIMPA \textit{shall} display species, life
+cycle, and recommended control action. \\
+\hline
+D-04 & NFR-02 no indica percentil de medición del tiempo de respuesta & No verificable & \textit{While}
+bandwidth is at least 5 Mbps, the SIMPA \textit{shall} return a diagnosis within 10 seconds for at
+least the 95th percentile of requests. \\
+\hline
+D-05 & RF-14 usa lenguaje impreciso sobre el mecanismo de conteo & Ambigüedad & \textit{While} GPS
+tracking is active with sampling $\leq$ 30 s, the SIMPA \textit{shall} compute automatically the
+daily pollinated-flower count per worker. \\
+\hline
+D-06 & RD-05 no está trazada a ningún NFR de disponibilidad & Trazabilidad incompleta & Se añadió la
+traza RD-05 $\rightarrow$ NFR-03 en la matriz de trazabilidad de la \Cref{tab:matriz-trazabilidad}. \\
+\hline
+\end{longtable}
+\chapter{Exportaciones originales de todos los diagramas (alta resolución)}
+
+Los diagramas fuente en formato editable (draw.io / StarUML) y sus exportaciones en alta resolución
+(PNG/SVG) se encuentran versionados en el repositorio del proyecto, en la carpeta
+\texttt{evidencias/diagramas/}, referenciado desde el repositorio general del equipo AHMRV:
+\url{https://github.com/AlanNVR/Villafuerte_Grupo_AHMRV/tree/main/AHMRV}. A continuación se listan los
+marcadores de las figuras que deben insertarse en dicha carpeta y enlazarse en este documento:
+
+\begin{itemize}
+  \item \textbf{Aquí va la imagen del Diagrama ER.}
+  \item \textbf{Aquí va la imagen del Diagrama de Clases UML.}
+  \item \textbf{Aquí va la imagen del DFD Nivel 0.}
+  \item \textbf{Aquí va la imagen del DFD Nivel 1.}
+  \item \textbf{Aquí va la imagen del DFD Esencial.}
+  \item \textbf{Aquí va la imagen del Diagrama de Actividades.}
+  \item \textbf{Aquí va la imagen del Diagrama de Máquina de Estados.}
+  \item \textbf{Aquí va la imagen del Diagrama de Secuencia.}
+\end{itemize}
+\chapter{Referencias IEEE y declaración de uso de IA}
+
+\section{Declaración de uso de inteligencia artificial}
+
+En la elaboración de este documento se utilizó un modelo de lenguaje de gran escala (Claude, de
+Anthropic) como herramienta de apoyo para: (i) estructurar el documento conforme a
+IEEE/ISO/IEC 29148:2018~\cite{ieee29148}; (ii) redactar la revisión de defectos y su corrección en
+sintaxis EARS~\cite{mavin2009} a partir de los requisitos ya formalizados en la Entrega 1B del PFC;
+(iii) proponer la tabla de atributos, el modelo entidad-relación, el diagrama de clases, los DFD, el
+diagrama de actividades, la máquina de estados, el diagrama de secuencia y la matriz de trazabilidad,
+en todos los casos derivados exclusivamente del contenido del PFC del SIMPA proporcionado como fuente;
+y (iv) localizar y verificar mediante búsqueda web las referencias bibliográficas adicionales con DOI
+real citadas en las conclusiones y en el marco teórico. Ningún diagrama fue generado como imagen por la
+IA: todos los lugares donde debe insertarse un diagrama construido en herramienta CASE (draw.io o
+StarUML) se dejaron marcados explícitamente con el texto correspondiente. La revisión crítica final del
+contenido, su coherencia con el PFC y la verificación de los DOI reales quedó a cargo del equipo
+AHMRV.
+
+\section{Índice de referencias en formato IEEE}
+
+Las referencias se generan automáticamente a partir de \texttt{referencias.bib} mediante
+\texttt{ieeetr}. Se listan a continuación de forma resumida para verificación rápida:
+
+\begin{enumerate}[label=\lbrack{}\arabic*\rbrack{}]
+  \item IEEE/ISO/IEC 29148:2018 -- Requirements engineering.
+  \item IEEE/ISO/IEC 15288:2023 -- System life cycle processes.
+  \item IEEE/ISO/IEC 12207:2017 -- Software life cycle processes.
+  \item ISO/IEC 25010:2023 -- SQuaRE product quality model.
+  \item K. Pohl, \textit{Requirements Engineering}, 2.\textsuperscript{a} ed., Springer, 2025.
+  \item SWEBOK Guide V4.0, IEEE Computer Society, 2024.
+  \item PMBoK Guide, 7.\textsuperscript{a} ed., PMI, 2021.
+  \item IREB CPRE Foundation Level Syllabus v3.1, 2023.
+  \item L. A. Maciaszek, \textit{Requirements Analysis and System Design}, 3.\textsuperscript{a} ed.,
+  Addison-Wesley, 2007.
+  \item D. Harel, ``Statecharts,'' \textit{Science of Computer Programming}, 1987,
+  doi: 10.1016/0167-6423(87)90035-9.
+  \item E. Hull, K. Jackson, J. Dick, \textit{Requirements Engineering}, 3.\textsuperscript{a} ed.,
+  Springer, 2011, doi: 10.1007/978-1-84996-405-0.
+  \item A. Mavin et al., ``EARS,'' RE'09, 2009, doi: 10.1109/RE.2009.9.
+  \item M. Abu-Zanona et al., ``Classification of Palm Trees Diseases Using CNN,'' IJACSA, 2022,
+  doi: 10.14569/ijacsa.2022.01306111.
+  \item H. Hamdani et al., ``Detection of oil palm leaf disease,'' Optik, 2021,
+  doi: 10.1016/j.ijleo.2021.167753.
+  \item L. Miksa, ``GPS Tracking Technologies for Agriculture,'' Agrotechnology, 2022,
+  doi: 10.35248/2168-9881.22.11.286.
+  \item N. Chamara et al., ``Ag-IoT for crop and environment monitoring,'' Agricultural Systems, 2022,
+  doi: 10.1016/j.agsy.2022.103497.
+  \item H. Rojas et al., ``Mapping the Evolution of ISO/IEC 25010,'' ETASR, 2025,
+  doi: 10.48084/etasr.11772.
+\end{enumerate}
 
 \end{document}
